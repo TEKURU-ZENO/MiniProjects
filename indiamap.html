@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>India Interactive Map — Terrain style + District lookup + Weather (Free)</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <style>
+    html,body,#map { height: 100%; margin: 0; padding: 0; }
+    .infoBox { font-family: system-ui, Arial; font-size: 14px; line-height: 1.35; }
+    .infoBox h3 { margin: 0 0 6px 0; font-size: 16px; }
+    .loader { display:inline-block; width:14px; height:14px; border:2px solid #777; border-radius:50%; border-top-color:transparent; animation:spin .9s linear infinite; vertical-align:middle; margin-right:6px;}
+    @keyframes spin { to { transform: rotate(360deg);} }
+    .attribution-note { position: absolute; left: 8px; bottom: 8px; background: rgba(255,255,255,0.8); padding:6px 8px; font-size:12px; border-radius:4px; z-index: 1000; }
+    .status-control { background: rgba(255,255,255,0.9); padding: 6px 8px; font-size: 12px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); min-width: 160px; }
+    .status-success { border-left: 3px solid #28a745; }
+    .status-warning { border-left: 3px solid #ffc107; color: #856404; }
+    .status-error { border-left: 3px solid #dc3545; color: #721c24; }
+    .debug-info { font-size: 11px; color: #666; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="attribution-note">Tiles: OpenTopoMap / OpenStreetMap. District GeoJSON: place <code>india_districts_simplified.geojson</code> alongside this file.</div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Turf.js for point-in-polygon checks -->
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
+  <script>
+  // -------------------- CONFIG --------------------
+  // Place a GeoJSON file named 'india_districts_simplified.geojson' in the same folder as this HTML file.
+  // Recommended sources to download a simplified India districts GeoJSON (simplify to reduce file size):
+  // - DataMeet maps repo (https://github.com/datameet/maps) -> districts
+  // - GADM (process & simplify)
+  // After placing the file, open this file via a local server: `python -m http.server` and visit http://localhost:8000
+  const DISTRICTS_GEOJSON = 'india_district_simplified.geojson';
+
+  // Open-Meteo URL base (free, no API key required)
+  const OPEN_METEO_BASE = 'https://api.open-meteo.com/v1/forecast?current_weather=true&';
+
+  // -------------------- MAP INIT --------------------
+  const map = L.map('map', { center: [22.0, 80.0], zoom: 5, minZoom: 3, maxZoom: 12 });
+
+  // Terrain-style tiles: OpenTopoMap (free - attribution required)
+  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    maxZoom: 17,
+    attribution: '&copy; OpenStreetMap contributors, &copy; OpenTopoMap (CC-BY-SA)'
+  }).addTo(map);
+
+  // Optional: add a subtle hillshade overlay (commented out — some providers restrict usage)
+  // L.tileLayer('https://tiles.wmflabs.org/hillshading/{z}/{x}/{y}.png', { opacity: 0.3 }).addTo(map);
+
+  L.control.scale({position:'bottomleft', imperial:false}).addTo(map);
+
+  // marker used when user clicks
+  let clickMarker = L.marker([0,0], { draggable: false });
+
+  // variable to hold loaded geojson features and a Leaflet layer for visualization
+  let districtsGeo = null; // GeoJSON FeatureCollection
+  let districtsLayer = null;
+  let statusControl = null;
+  let geoJsonStatus = 'loading'; // 'loading', 'loaded', 'error'
+  let debugInfo = '';
+
+  // Create status control
+  function createStatusControl() {
+    statusControl = L.control({position: 'topright'});
+    statusControl.onAdd = function() {
+      const div = L.DomUtil.create('div', 'leaflet-control status-control');
+      div.id = 'status-control';
+      updateStatusControl();
+      return div;
+    };
+    statusControl.addTo(map);
+  }
+
+  function updateStatusControl() {
+    if (!statusControl || !document.getElementById('status-control')) return;
+    
+    const div = document.getElementById('status-control');
+    let content = '';
+    let className = 'leaflet-control status-control';
+    
+    switch(geoJsonStatus) {
+      case 'loading':
+        className += ' status-warning';
+        content = '<div><span class="loader"></span>Loading district data...</div>';
+        break;
+      case 'loaded':
+        className += ' status-success';
+        content = `<div>✓ District data loaded</div><div class="debug-info">${debugInfo}</div>`;
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+          if (statusControl && statusControl._map) {
+            statusControl.remove();
+          }
+        }, 3000);
+        break;
+      case 'error':
+        className += ' status-error';
+        content = `<div>⚠️ District data unavailable</div><div class="debug-info">${debugInfo}</div>`;
+        break;
+    }
+    
+    div.className = className;
+    div.innerHTML = content;
+  }
+
+  // Validate GeoJSON structure and extract property info
+  function validateGeoJSON(geoJson) {
+    if (!geoJson || !geoJson.features || !Array.isArray(geoJson.features)) {
+      throw new Error('Invalid GeoJSON structure');
+    }
+    
+    if (geoJson.features.length === 0) {
+      throw new Error('GeoJSON contains no features');
+    }
+    
+    // Check what properties are available in the first few features
+    const sampleProps = geoJson.features.slice(0, 5).map(f => Object.keys(f.properties || {}));
+    const allProps = [...new Set(sampleProps.flat())];
+    
+    // Check for district-like properties
+    const districtProps = allProps.filter(prop => 
+      /district|name|area/i.test(prop) && 
+      !/state|st_|province/i.test(prop)
+    );
+    
+    // Check for state-like properties  
+    const stateProps = allProps.filter(prop => 
+      /state|st_|province/i.test(prop)
+    );
+    
+    debugInfo = `Features: ${geoJson.features.length}, District props found: [${districtProps.join(', ')}], State props found: [${stateProps.join(', ')}]`;
+    
+    if (districtProps.length === 0 && stateProps.length === 0) {
+      console.warn('No recognizable district/state properties found. Available properties:', allProps);
+      debugInfo += ' | Warning: No standard district/state properties detected';
+    }
+    
+    return true;
+  }
+
+  // Enhanced property lookup with better fallbacks
+  function extractDistrictState(properties) {
+    if (!properties) return { district: null, state: null };
+    
+    // Enhanced district lookup - try more variations
+    const district = properties.DISTRICT|| 
+                    properties.district || 
+                    properties.DISTRICT_N || 
+                    properties.DISTRICTNAME || 
+                    properties.NAME_2 || 
+                    properties.NAME || 
+                    properties.name ||
+                    properties.DIST_NAME ||
+                    properties.dist_name ||
+                    null;
+    
+    // Enhanced state lookup - try more variations
+    const state = properties.STATE || 
+                 properties.state ||
+                 properties.ST_NM|| 
+                 properties.STATE_NAME || 
+                 properties.St_Nm ||
+                 properties.STATE_UT ||
+                 properties.state_name ||
+                 properties.STATENAME ||
+                 null;
+    
+    return { district, state };
+  }
+
+  // Initialize status control
+  createStatusControl();
+
+  // load GeoJSON with enhanced error handling
+  fetch(DISTRICTS_GEOJSON)
+    .then(async res => {
+      if (!res.ok) {
+        const errorMsg = res.status === 404 ? 'File not found' : `HTTP ${res.status}`;
+        throw new Error(`${errorMsg} - Please ensure '${DISTRICTS_GEOJSON}' is in the same directory`);
+      }
+      
+      const gj = await res.json();
+      
+      // Validate the GeoJSON
+      validateGeoJSON(gj);
+      
+      districtsGeo = gj;
+      geoJsonStatus = 'loaded';
+      updateStatusControl();
+
+      // add a simplified visualization layer
+      districtsLayer = L.geoJSON(gj, {
+        style: function(feature) {
+          return { color: '#444', weight: 0.6, fillOpacity: 0 };
+        },
+        onEachFeature: function(feature, layer) {
+          layer.on('mouseover', function() { 
+            layer.setStyle({ weight:1.2, color:'#222' }); 
+          });
+          layer.on('mouseout', function() { 
+            layer.setStyle({ weight:0.6, color:'#444' }); 
+          });
+          // optional click on polygon to zoom & show props
+          layer.on('click', function(e) {
+            map.fitBounds(layer.getBounds(), { maxZoom:9 });
+            showInfoAtLatLng(e.latlng.lat, e.latlng.lng);
+          });
+        }
+      }).addTo(map);
+
+      console.log('✓ Districts GeoJSON loaded successfully:', {
+        features: gj.features.length,
+        sampleProperties: gj.features[0]?.properties ? Object.keys(gj.features[0].properties) : 'none'
+      });
+
+    })
+    .catch(err => {
+      console.error('Failed to load districts GeoJSON:', err);
+      geoJsonStatus = 'error';
+      debugInfo = err.message;
+      updateStatusControl();
+      
+      // Show helpful message based on how the page is being served
+      if (window.location.protocol === 'file:') {
+        debugInfo += ' | Tip: Use HTTP server (python -m http.server)';
+        updateStatusControl();
+      }
+    });
+
+  // helper to build popup HTML with enhanced information
+  function createInfoHtml({lat, lon, district, state, addressText, weather, rawProps}){
+    const temp = (weather && typeof weather.temperature === 'number') ? `${weather.temperature.toFixed(1)} °C` : 'N/A';
+    const cond = (weather && weather.weathercode !== undefined) ? `WMO code ${weather.weathercode}` : (weather && weather.description) ? weather.description : 'N/A';
+    
+    let debugSection = '';
+    if (rawProps && Object.keys(rawProps).length > 0) {
+      const propsPreview = Object.entries(rawProps)
+        .slice(0, 3)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(', ');
+      debugSection = `<div style="font-size: 11px; color: #666; margin-top: 8px;">Available props: ${propsPreview}${Object.keys(rawProps).length > 3 ? '...' : ''}</div>`;
+    }
+    
+    return `\
+      <div class="infoBox">\
+        <h3>Location info</h3>\
+        <div><strong>Coordinates:</strong> ${lat.toFixed(6)}, ${lon.toFixed(6)}</div>\
+        <div><strong>State:</strong> ${state || 'N/A'}</div>\
+        <div><strong>District:</strong> ${district || 'N/A'}</div>\
+        <div><strong>Address:</strong> ${addressText || 'N/A'}</div>\
+        <hr/>\
+        <h3>Weather (Open-Meteo)</h3>\
+        <div><strong>Temp:</strong> ${temp}</div>\
+        <div><strong>Condition:</strong> ${cond}</div>\
+        ${debugSection}\
+      </div>`;
+  }
+
+  // fetch weather from Open-Meteo with improved error handling
+  async function fetchWeather(lat, lon){
+    try {
+      const url = `${OPEN_METEO_BASE}latitude=${lat}&longitude=${lon}&timezone=auto`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      const data = await res.json();
+      if (data && data.current_weather) {
+        return { 
+          temperature: data.current_weather.temperature, 
+          weathercode: data.current_weather.weathercode 
+        };
+      }
+      return { description: 'No weather data available' };
+    } catch (e) {
+      console.warn('Weather fetch failed:', e);
+      return { description: `Weather error: ${e.message}` };
+    }
+  }
+
+  // Enhanced district/state lookup with better error handling
+  function lookupDistrictState(lat, lon){
+    if (!districtsGeo) {
+      return { district: null, state: null, error: 'District data not loaded' };
+    }
+    
+    const pt = turf.point([lon, lat]);
+    let checkedFeatures = 0;
+    let geometryErrors = 0;
+    
+    for (const feat of districtsGeo.features){
+      checkedFeatures++;
+      try {
+        if (turf.booleanPointInPolygon(pt, feat)){
+          const extracted = extractDistrictState(feat.properties);
+          console.log('✓ Found location in:', feat.properties);
+          return { 
+            district: extracted.district, 
+            state: extracted.state, 
+            props: feat.properties,
+            matchedFeature: checkedFeatures
+          };
+        }
+      } catch (e){
+        geometryErrors++;
+        console.warn(`Geometry error in feature ${checkedFeatures}:`, e);
+      }
+    }
+    
+    console.log(`Checked ${checkedFeatures} features, ${geometryErrors} geometry errors, no match found for [${lat}, ${lon}]`);
+    return { 
+      district: null, 
+      state: null, 
+      error: `No match in ${checkedFeatures} features${geometryErrors > 0 ? ` (${geometryErrors} geometry errors)` : ''}` 
+    };
+  }
+
+  // Enhanced info display with debugging information
+  async function showInfoAtLatLng(lat, lon){
+    // move marker
+    if (!clickMarker._map) clickMarker.addTo(map);
+    clickMarker.setLatLng([lat, lon]);
+    clickMarker.bindPopup(`<div class="infoBox"><div><span class="loader"></span>Fetching location info...</div></div>`).openPopup();
+
+    // 1) Lookup district/state locally if GeoJSON loaded
+    const lookup = lookupDistrictState(lat, lon);
+
+    // 2) Fetch weather
+    const weather = await fetchWeather(lat, lon);
+
+    // 3) Try to build a short address text using available props (if any)
+    let addressText = null;
+    if (lookup.props) {
+      const parts = [];
+      if (lookup.district) parts.push(lookup.district);
+      if (lookup.state) parts.push(lookup.state);
+      addressText = parts.join(', ') || 'Location identified';
+    } else if (lookup.error) {
+      addressText = lookup.error;
+    }
+
+    const html = createInfoHtml({
+      lat, 
+      lon, 
+      district: lookup.district, 
+      state: lookup.state, 
+      addressText, 
+      weather,
+      rawProps: lookup.props
+    });
+    
+    clickMarker.setPopupContent(html).openPopup();
+  }
+
+  // Map click handler
+  map.on('click', function(e){
+    const lat = e.latlng.lat;
+    const lon = e.latlng.lng;
+    showInfoAtLatLng(lat, lon);
+  });
+
+  // Enhanced locate control
+  const locateControl = L.control({position: 'topleft'});
+  locateControl.onAdd = function() {
+    const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+    div.style.background = '#fff'; 
+    div.style.padding = '8px'; 
+    div.style.cursor = 'pointer'; 
+    div.style.fontSize = '16px';
+    div.title = 'Find my location';
+    div.innerHTML = '📍';
+    div.onclick = () => {
+      div.innerHTML = '⏳';
+      map.locate({setView:true, maxZoom:9});
+    };
+    return div;
+  };
+  locateControl.addTo(map);
+
+  map.on('locationfound', function(e){ 
+    document.querySelector('.leaflet-control').innerHTML = '📍';
+    showInfoAtLatLng(e.latitude, e.longitude); 
+  });
+
+  map.on('locationerror', function(e){ 
+    console.warn('Location error:', e.message);
+    document.querySelector('.leaflet-control').innerHTML = '📍';
+    alert('Location access denied or unavailable: ' + e.message);
+  });
+
+  // Add helpful keyboard shortcut
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && clickMarker._map) {
+      map.closePopup();
+      clickMarker.remove();
+    }
+  });
+
+  console.log('🗺️ India Interactive Map initialized. Click anywhere on the map to get location info!');
+  </script>
+</body>
+</html>

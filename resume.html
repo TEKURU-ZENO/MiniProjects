@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Mehta - Full Stack Developer & AI Engineer</title>
+    <style id="basic-styles">
+        /* Initial basic styles - no CSS styling */
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: white; 
+            color: black;
+            line-height: 1.4;
+        }
+        .style-button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .style-button:hover {
+            background: #005a9e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,122,204,0.3);
+        }
+        .hidden { display: none; }
+        h1, h2, h3 { margin: 10px 0; }
+        ul { padding-left: 20px; }
+        .contact-info { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <!-- Basic HTML Resume -->
+    <div id="basic-resume">
+        <button class="style-button" onclick="activateStyledMode()">STYLE ME</button>
+        
+        <h1>DEV MEHTA</h1>
+        <h2>FULL STACK DEVELOPER AND AI ENGINEER</h2>
+        
+        <div class="contact-info">
+            <p><strong>Contact:</strong></p>
+            <p>Phone: +91 90801 11855</p>
+            <p>Email: devmehta060505@gmail.com</p>
+            <p>Address: 14/59, 4 cross st, ganga nagar, kodambakkam, chennai-24</p>
+            <p>LinkedIn: www.linkedin.com/in/dev-mehta-1861bb2a0</p>
+        </div>
+
+        <h3>PROFILE</h3>
+        <p>Detail-oriented Computer Science graduate with strong problem-solving skills and a solid grasp of core computing concepts. Proficient in Java, Python, and C++, with experience in full-stack development, APIs, and machine learning. Eager to apply technical expertise in a dynamic environment and grow as a software engineer.</p>
+
+        <h3>EDUCATION</h3>
+        <ul>
+            <li><strong>SRM Institute of Science and Technology, Vadapalani, Chennai</strong><br>
+            B.Tech Computer Science and Engineering (2023 - present)</li>
+            <li><strong>Union Christian Public School</strong><br>
+            Higher Secondary Education (2021-22)</li>
+            <li><strong>Union Christian Public School</strong><br>
+            Secondary Education (2022 - 2023)</li>
+        </ul>
+
+        <h3>SKILLS</h3>
+        <ul>
+            <li>Technical Skills</li>
+            <li>Programming Knowledge and skills</li>
+            <li>Teamwork</li>
+            <li>Time Management</li>
+            <li>Leadership</li>
+            <li>Effective Communication</li>
+            <li>Critical Thinking</li>
+        </ul>
+
+        <h3>LANGUAGES</h3>
+        <ul>
+            <li>English (Proficient)</li>
+            <li>Tamil (Native)</li>
+            <li>Hindi (Fluent)</li>
+        </ul>
+
+        <h3>WORK EXPERIENCE</h3>
+        <h4>Internzvalley - Internship Program (Virtual) (October 2024 - November 2024)</h4>
+        <p>Completed a 2-month internship in Artificial Intelligence (Oct–Nov 2024), gaining hands-on experience in AI concepts, model development, and problem-solving using intelligent systems.</p>
+
+        <h3>PROJECTS</h3>
+        <h4>Restaurant Web Application</h4>
+        <p>Developed a responsive and interactive restaurant management web application using React.js. The system includes features such as dynamic menu display, order management, and a modern UI for seamless user experience. Integrated state management, routing, and reusable components to ensure scalability and maintainability. Focused on performance optimization and clean, modular code.</p>
+
+        <h4>Prediction Machine Learning Model</h4>
+        <p>Developed a collection of foundational machine learning models and algorithms from scratch using Python and essential libraries such as NumPy, Pandas, and scikit-learn. Implemented and experimented with linear regression, logistic regression, k-means clustering, decision trees, and other ML techniques. Focused on understanding core concepts, preprocessing datasets, evaluating model performance, and visualizing results to build a strong foundation in applied machine learning.</p>
+
+        <h3>CERTIFICATIONS</h3>
+        <ul>
+            <li>NPTEL - Introduction to C</li>
+            <li>NPTEL - Data Structures and Algorithm Using Python</li>
+            <li>NPTEL - Database Management System</li>
+            <li>NASSCOM - Data Visualization and Processing</li>
+            <li>Hackerrank - Gold Badge (5 Stars) in C++</li>
+        </ul>
+    </div>
+
+    <!-- PDF Styled Resume (Hidden Initially) -->
+    <div id="styled-resume" class="hidden">
+        <div class="resume-container">
+            <div class="sidebar">
+                <img src="static/profilepic.jpg" alt="Dev Mehta" class="profile-image">
+                
+                <h3>CONTACT</h3>
+                <div class="contact-item phone">
+                    <span class="icon">📱</span>
+                    +91 90801 11855
+                </div>
+                <div class="contact-item email">
+                    <span class="icon">📧</span>
+                    devmehta060505@gmail.com
+                </div>
+                <div class="contact-item location">
+                    <span class="icon">📍</span>
+                    14/59, 4 cross st, ganga nagar, kodambakkam, chennai-24
+                </div>
+                <div class="contact-item linkedin">
+                    <span class="icon">🔗</span>
+                    www.linkedin.com/in/dev-mehta-1861bb2a0
+                </div>
+                
+                <h3>EDUCATION</h3>
+                <div class="education-item">
+                    <div class="edu-year">2023 - present</div>
+                    <div class="edu-content">
+                        <strong>SRM Institute of Science and Technology, Vadapalani, Chennai</strong>
+                        <div class="edu-degree">B.Tech Computer Science and Engineering</div>
+                    </div>
+                </div>
+                <div class="education-item">
+                    <div class="edu-year">2021-22</div>
+                    <div class="edu-content">
+                        <strong>Union Christian Public School</strong>
+                        <div class="edu-degree">Higher Secondary Education</div>
+                    </div>
+                </div>
+                <div class="education-item">
+                    <div class="edu-year">2022 - 2023</div>
+                    <div class="edu-content">
+                        <strong>Union Christian Public School</strong>
+                        <div class="edu-degree">Secondary Education</div>
+                    </div>
+                </div>
+                
+                <h3>SKILLS</h3>
+                <ul class="skills-list">
+                    <li>Technical Skills</li>
+                    <li>Programming Knowledge and skills</li>
+                    <li>Teamwork</li>
+                    <li>Time Management</li>
+                    <li>Leadership</li>
+                    <li>Effective Communication</li>
+                    <li>Critical Thinking</li>
+                </ul>
+                
+                <h3>LANGUAGES</h3>
+                <ul class="languages-list">
+                    <li>English (Proficient)</li>
+                    <li>Tamil (Native)</li>
+                    <li>Hindi (Fluent)</li>
+                </ul>
+            </div>
+            
+            <div class="main-content">
+                <div class="header">
+                    <h1>DEV MEHTA</h1>
+                    <h2>FULL STACK DEVELOPER AND AI ENGINEER</h2>
+                </div>
+                
+                <section>
+                    <h3>PROFILE</h3>
+                    <p>Detail-oriented Computer Science graduate with strong problem-solving skills and a solid grasp of core computing concepts. Proficient in Java, Python, and C++, with experience in full-stack development, APIs, and machine learning. Eager to apply technical expertise in a dynamic environment and grow as a software engineer.</p>
+                </section>
+                
+                <section>
+                    <h3>WORK EXPERIENCE</h3>
+                    <div class="work-item">
+                        <div class="work-header">
+                            <h4>Internzvalley</h4>
+                            <span class="date">October 2024 - November 2024</span>
+                        </div>
+                        <div class="work-subtitle">Internship Program (Virtual)</div>
+                        <ul>
+                            <li>Completed a 2-month internship in Artificial Intelligence (Oct–Nov 2024), gaining hands-on experience in AI concepts, model development, and problem-solving using intelligent systems.</li>
+                        </ul>
+                    </div>
+                </section>
+                
+                <section>
+                    <h3>PROJECTS</h3>
+                    <div class="project-item">
+                        <h4>Restaurant Web Application</h4>
+                        <ul>
+                            <li>Developed a responsive and interactive restaurant management web application using React.js.</li>
+                            <li>The system includes features such as dynamic menu display, order management, and a modern UI for seamless user experience.</li>
+                            <li>Integrated state management, routing, and reusable components to ensure scalability and maintainability.</li>
+                            <li>Focused on performance optimization and clean, modular code.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="project-item">
+                        <h4>Prediction Machine Learning Model</h4>
+                        <ul>
+                            <li>Developed a collection of foundational machine learning models and algorithms from scratch using Python and essential libraries such as NumPy, Pandas, and scikit-learn.</li>
+                            <li>Implemented and experimented with linear regression, logistic regression, k-means clustering, decision trees, and other ML techniques.</li>
+                            <li>Focused on understanding core concepts, preprocessing datasets, evaluating model performance, and visualizing results to build a strong foundation in applied machine learning.</li>
+                        </ul>
+                    </div>
+                </section>
+                
+                <section>
+                    <h3>CERTIFICATIONS</h3>
+                    <div class="certification-grid">
+                        <div class="cert-column">
+                            <h5>NPTEL</h5>
+                            <ul>
+                                <li>Introduction to C</li>
+                                <li>Data Structures and Algorithm Using Python</li>
+                                <li>Database Management System</li>
+                            </ul>
+                        </div>
+                        <div class="cert-column">
+                            <h5>NASSCOM</h5>
+                            <ul>
+                                <li>Data Visualization and Processing</li>
+                            </ul>
+                            <h5>Hackerrank</h5>
+                            <ul>
+                                <li>Gold Badge (5 Stars) in C++</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+        
+        <button class="reset-button" onclick="resetToBasic()">RETURN TO BASIC MODE</button>
+    </div>
+
+    <style id="styled-styles" class="hidden">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        #styled-resume {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.5;
+            color: #333;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .resume-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            display: flex;
+            min-height: calc(100vh - 40px);
+        }
+        
+        .sidebar {
+            width: 300px;
+            background: #2c5282;
+            color: white;
+            padding: 30px 25px;
+            position: relative;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 30px 35px;
+            background: white;
+        }
+        
+        .profile-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-bottom: 25px;
+            border: 4px solid white;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .sidebar h3 {
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 25px 0 15px 0;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 5px;
+            letter-spacing: 1px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .contact-item .icon {
+            margin-right: 8px;
+            width: 16px;
+            flex-shrink: 0;
+        }
+        
+        .education-item {
+            margin-bottom: 18px;
+        }
+        
+        .edu-year {
+            color: #4a90e2;
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+        
+        .edu-content strong {
+            font-size: 12px;
+            display: block;
+            margin-bottom: 2px;
+        }
+        
+        .edu-degree {
+            font-size: 11px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+        
+        .skills-list, .languages-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        
+        .skills-list li, .languages-list li {
+            margin-bottom: 6px;
+            font-size: 12px;
+            position: relative;
+            padding-left: 8px;
+        }
+        
+        .skills-list li::before, .languages-list li::before {
+            content: "•";
+            color: #4a90e2;
+            position: absolute;
+            left: 0;
+        }
+        
+        .header {
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            color: #2c5282;
+            font-weight: bold;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+        
+        .header h2 {
+            font-size: 1.1rem;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: normal;
+            margin-bottom: 10px;
+            border-bottom: 3px solid #4a90e2;
+            padding-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        section {
+            margin-bottom: 30px;
+        }
+        
+        section h3 {
+            color: #2c5282;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 5px;
+            letter-spacing: 1px;
+        }
+        
+        section h4 {
+            color: #2c5282;
+            font-size: 1rem;
+            margin: 15px 0 8px 0;
+            font-weight: 600;
+        }
+        
+        section h5 {
+            color: #2c5282;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        section p {
+            text-align: justify;
+            margin-bottom: 15px;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        section ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        section li {
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .work-item, .project-item {
+            margin-bottom: 25px;
+        }
+        
+        .work-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 5px;
+        }
+        
+        .work-subtitle {
+            font-style: italic;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .date {
+            color: #4a90e2;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .certification-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 15px;
+        }
+        
+        .cert-column ul {
+            margin-left: 0;
+        }
+        
+        .cert-column li {
+            font-size: 13px;
+            margin-bottom: 6px;
+            list-style: none;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        .cert-column li::before {
+            content: "•";
+            color: #4a90e2;
+            position: absolute;
+            left: 0;
+        }
+        
+        .reset-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #2c5282, #4a90e2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 25px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(44, 82, 130, 0.3);
+        }
+        
+        .reset-button:hover {
+            background: linear-gradient(45deg, #1a365d, #2c5282);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(44, 82, 130, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .resume-container {
+                flex-direction: column;
+                margin: 10px;
+            }
+            .sidebar {
+                width: 100%;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .certification-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <script>
+        function activateStyledMode() {
+            // Hide basic resume
+            document.getElementById('basic-resume').classList.add('hidden');
+            
+            // Show styled resume
+            document.getElementById('styled-resume').classList.remove('hidden');
+            
+            // Add styled CSS
+            document.getElementById('styled-styles').classList.remove('hidden');
+        }
+
+        function resetToBasic() {
+            // Show basic resume
+            document.getElementById('basic-resume').classList.remove('hidden');
+            
+            // Hide styled resume
+            document.getElementById('styled-resume').classList.add('hidden');
+            
+            // Hide styled CSS
+            document.getElementById('styled-styles').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
