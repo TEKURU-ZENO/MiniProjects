@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transforming Calculator</title>
+</head>
+<body>
+    <div id="calculator-container">
+        <h1>Basic Calculator</h1>
+        
+        <form id="calculator-form">
+            <input type="text" id="display" readonly value="0">
+            <br><br>
+            
+            <input type="button" value="C" onclick="clearDisplay()">
+            <input type="button" value="CE" onclick="clearEntry()">
+            <input type="button" value="(" onclick="appendOperator('(')">
+            <input type="button" value=")" onclick="appendOperator(')')">
+            <input type="button" value="√" onclick="calculateRoot()">
+            <input type="button" value="x²" onclick="calculateSquare()">
+            <br><br>
+            
+            <input type="button" value="sin" onclick="calculateSin()">
+            <input type="button" value="cos" onclick="calculateCos()">
+            <input type="button" value="tan" onclick="calculateTan()">
+            <input type="button" value="log" onclick="calculateLog()">
+            <input type="button" value="ln" onclick="calculateLn()">
+            <input type="button" value="x^y" onclick="appendOperator('^')">
+            <br><br>
+            
+            <input type="button" value="π" onclick="appendNumber('3.141592653589793')">
+            <input type="button" value="e" onclick="appendNumber('2.718281828459045')">
+            <input type="button" value="±" onclick="toggleSign()">
+            <input type="button" value="%" onclick="percentage()">
+            <input type="button" value="1/x" onclick="calculateReciprocal()">
+            <input type="button" value="÷" onclick="appendOperator('/')">
+            <br><br>
+            
+            <input type="button" value="7" onclick="appendNumber('7')">
+            <input type="button" value="8" onclick="appendNumber('8')">
+            <input type="button" value="9" onclick="appendNumber('9')">
+            <input type="button" value="×" onclick="appendOperator('*')">
+            <br><br>
+            
+            <input type="button" value="4" onclick="appendNumber('4')">
+            <input type="button" value="5" onclick="appendNumber('5')">
+            <input type="button" value="6" onclick="appendNumber('6')">
+            <input type="button" value="-" onclick="appendOperator('-')">
+            <br><br>
+            
+            <input type="button" value="1" onclick="appendNumber('1')">
+            <input type="button" value="2" onclick="appendNumber('2')">
+            <input type="button" value="3" onclick="appendNumber('3')">
+            <input type="button" value="+" onclick="appendOperator('+')">
+            <br><br>
+            
+            <input type="button" value="0" onclick="appendNumber('0')" style="width: 100px;">
+            <input type="button" value="." onclick="appendDecimal()">
+            <input type="button" value="=" onclick="calculate()">
+            <br><br>
+            
+            <button type="button" id="style-btn" onclick="styleMe()" style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: transform 0.2s;">
+                Style Me!
+            </button>
+        </form>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let currentInput = '0';
+        let operator = '';
+        let previousInput = '';
+        let shouldResetDisplay = false;
+
+        function updateDisplay() {
+            display.value = currentInput;
+        }
+
+        function clearDisplay() {
+            currentInput = '0';
+            operator = '';
+            previousInput = '';
+            shouldResetDisplay = false;
+            updateDisplay();
+        }
+
+        function appendNumber(num) {
+            if (shouldResetDisplay) {
+                currentInput = '0';
+                shouldResetDisplay = false;
+            }
+            
+            if (currentInput === '0') {
+                currentInput = num;
+            } else {
+                currentInput += num;
+            }
+            updateDisplay();
+        }
+
+        function appendDecimal() {
+            if (shouldResetDisplay) {
+                currentInput = '0';
+                shouldResetDisplay = false;
+            }
+            
+            if (currentInput.indexOf('.') === -1) {
+                currentInput += '.';
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            if (operator !== '' && !shouldResetDisplay) {
+                calculate();
+            }
+            
+            operator = op;
+            previousInput = currentInput;
+            shouldResetDisplay = true;
+        }
+
+        function calculate() {
+            if (operator === '' || shouldResetDisplay) return;
+            
+            let prev = parseFloat(previousInput);
+            let current = parseFloat(currentInput);
+            let result;
+            
+            switch (operator) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    if (current === 0) {
+                        alert('Cannot divide by zero!');
+                        return;
+                    }
+                    result = prev / current;
+                    break;
+                case '^':
+                    result = Math.pow(prev, current);
+                    break;
+                default:
+                    return;
+            }
+            
+            currentInput = result.toString();
+            operator = '';
+            previousInput = '';
+            shouldResetDisplay = true;
+            updateDisplay();
+        }
+
+        function toggleSign() {
+            if (currentInput !== '0') {
+                currentInput = currentInput.charAt(0) === '-' 
+                    ? currentInput.slice(1) 
+                    : '-' + currentInput;
+                updateDisplay();
+            }
+        }
+
+        function percentage() {
+            currentInput = (parseFloat(currentInput) / 100).toString();
+            updateDisplay();
+        }
+
+        function clearEntry() {
+            currentInput = '0';
+            updateDisplay();
+        }
+
+        function calculateSquare() {
+            const num = parseFloat(currentInput);
+            currentInput = (num * num).toString();
+            updateDisplay();
+        }
+
+        function calculateRoot() {
+            const num = parseFloat(currentInput);
+            if (num < 0) {
+                alert('Cannot calculate square root of negative number');
+                return;
+            }
+            currentInput = Math.sqrt(num).toString();
+            updateDisplay();
+        }
+
+        function calculateSin() {
+            const num = parseFloat(currentInput);
+            currentInput = Math.sin(num * Math.PI / 180).toString(); // Convert to radians
+            updateDisplay();
+        }
+
+        function calculateCos() {
+            const num = parseFloat(currentInput);
+            currentInput = Math.cos(num * Math.PI / 180).toString(); // Convert to radians
+            updateDisplay();
+        }
+
+        function calculateTan() {
+            const num = parseFloat(currentInput);
+            currentInput = Math.tan(num * Math.PI / 180).toString(); // Convert to radians
+            updateDisplay();
+        }
+
+        function calculateLog() {
+            const num = parseFloat(currentInput);
+            if (num <= 0) {
+                alert('Cannot calculate logarithm of non-positive number');
+                return;
+            }
+            currentInput = Math.log10(num).toString();
+            updateDisplay();
+        }
+
+        function calculateLn() {
+            const num = parseFloat(currentInput);
+            if (num <= 0) {
+                alert('Cannot calculate natural logarithm of non-positive number');
+                return;
+            }
+            currentInput = Math.log(num).toString();
+            updateDisplay();
+        }
+
+        function calculateReciprocal() {
+            const num = parseFloat(currentInput);
+            if (num === 0) {
+                alert('Cannot divide by zero');
+                return;
+            }
+            currentInput = (1 / num).toString();
+            updateDisplay();
+        }
+
+        function styleMe() {
+            // Add styles
+            const style = document.createElement('style');
+            style.textContent = `
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    min-height: 100vh;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 20px;
+                }
+
+                #calculator-container {
+                    background: rgba(255, 255, 255, 0.95);
+                    backdrop-filter: blur(10px);
+                    border-radius: 20px;
+                    padding: 30px;
+                    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+                    border: 3px solid #000000;
+                }
+
+                h1 {
+                    text-align: center;
+                    margin-bottom: 20px;
+                    color: #333;
+                    font-weight: 300;
+                    font-size: 24px;
+                }
+
+                #display {
+                    width: 100%;
+                    height: 80px;
+                    font-size: 32px;
+                    text-align: right;
+                    padding: 0 20px;
+                    border: none;
+                    background: #000;
+                    color: #fff;
+                    border-radius: 10px;
+                    margin-bottom: 20px;
+                    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+                    font-family: 'Courier New', monospace;
+                }
+
+                input[type="button"], button {
+                    width: 60px;
+                    height: 60px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    border: none;
+                    border-radius: 15px;
+                    margin: 3px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                }
+
+                input[type="button"]:hover, button:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+                }
+
+                input[type="button"]:active, button:active {
+                    transform: translateY(0);
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+                }
+
+                /* Number buttons */
+                input[value="0"], input[value="1"], input[value="2"], input[value="3"], 
+                input[value="4"], input[value="5"], input[value="6"], input[value="7"], 
+                input[value="8"], input[value="9"], input[value="."] {
+                    background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+                    color: #333;
+                }
+
+                input[value="0"], input[value="1"], input[value="2"], input[value="3"], 
+                input[value="4"], input[value="5"], input[value="6"], input[value="7"], 
+                input[value="8"], input[value="9"], input[value="."]:hover {
+                    background: linear-gradient(145deg, #e0e0e0, #d0d0d0);
+                }
+
+                /* Operator buttons */
+                input[value="÷"], input[value="×"], input[value="-"], input[value="+"], input[value="="] {
+                    background: linear-gradient(145deg, #ff6b6b, #ff5252);
+                    color: white;
+                }
+
+                input[value="÷"]:hover, input[value="×"]:hover, input[value="-"]:hover, 
+                input[value="+"]:hover, input[value="="]:hover {
+                    background: linear-gradient(145deg, #ff5252, #ff3030);
+                }
+
+                /* Scientific function buttons */
+                input[value="sin"], input[value="cos"], input[value="tan"], input[value="log"], 
+                input[value="ln"], input[value="√"], input[value="x²"], input[value="x^y"], 
+                input[value="1/x"], input[value="π"], input[value="e"], input[value="("], input[value=")"] {
+                    background: linear-gradient(145deg, #9c27b0, #7b1fa2);
+                    color: white;
+                    font-size: 12px;
+                }
+
+                input[value="sin"]:hover, input[value="cos"]:hover, input[value="tan"]:hover, 
+                input[value="log"]:hover, input[value="ln"]:hover, input[value="√"]:hover, 
+                input[value="x²"]:hover, input[value="x^y"]:hover, input[value="1/x"]:hover, 
+                input[value="π"]:hover, input[value="e"]:hover, input[value="("]:hover, input[value=")"]:hover {
+                    background: linear-gradient(145deg, #7b1fa2, #4a148c);
+                }
+
+                /* Function buttons */
+                input[value="C"], input[value="CE"], input[value="±"], input[value="%"] {
+                    background: linear-gradient(145deg, #4ecdc4, #26d0ce);
+                    color: white;
+                }
+
+                input[value="C"]:hover, input[value="CE"]:hover, input[value="±"]:hover, input[value="%"]:hover {
+                    background: linear-gradient(145deg, #26d0ce, #1ba8a5);
+                }
+
+                /* Zero button special width */
+                input[value="0"] {
+                    width: 126px !important;
+                }
+
+                #style-btn {
+                    background: linear-gradient(45deg, #667eea, #764ba2) !important;
+                    color: white !important;
+                    padding: 15px 30px !important;
+                    border: none !important;
+                    border-radius: 25px !important;
+                    cursor: pointer !important;
+                    font-weight: bold !important;
+                    font-size: 16px !important;
+                    width: auto !important;
+                    height: auto !important;
+                    margin-top: 20px !important;
+                    opacity: 0.5;
+                    pointer-events: none;
+                }
+
+                @keyframes pulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                    100% { transform: scale(1); }
+                }
+
+                .calc-button-animation {
+                    animation: pulse 0.1s ease-in-out;
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Add enhanced functionality
+            const buttons = document.querySelectorAll('input[type="button"]');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.classList.add('calc-button-animation');
+                    setTimeout(() => {
+                        this.classList.remove('calc-button-animation');
+                    }, 100);
+                });
+            });
+
+            // Add keyboard support
+            document.addEventListener('keydown', function(e) {
+                const key = e.key;
+                
+                if (key >= '0' && key <= '9') {
+                    appendNumber(key);
+                    animateButton(key);
+                } else if (key === '.') {
+                    appendDecimal();
+                    animateButton('.');
+                } else if (key === '+') {
+                    appendOperator('+');
+                    animateButton('+');
+                } else if (key === '-') {
+                    appendOperator('-');
+                    animateButton('-');
+                } else if (key === '*') {
+                    appendOperator('*');
+                    animateButton('×');
+                } else if (key === '/') {
+                    e.preventDefault();
+                    appendOperator('/');
+                    animateButton('÷');
+                } else if (key === 'Enter' || key === '=') {
+                    e.preventDefault();
+                    calculate();
+                    animateButton('=');
+                } else if (key === 'Escape' || key.toLowerCase() === 'c') {
+                    clearDisplay();
+                    animateButton('C');
+                } else if (key === '%') {
+                    percentage();
+                    animateButton('%');
+                }
+            });
+
+            function animateButton(value) {
+                const button = document.querySelector(`input[value="${value}"]`);
+                if (button) {
+                    button.classList.add('calc-button-animation');
+                    setTimeout(() => {
+                        button.classList.remove('calc-button-animation');
+                    }, 100);
+                }
+            }
+
+            // Update the style button
+            const styleBtn = document.getElementById('style-btn');
+            styleBtn.textContent = 'Styled! ✓';
+            
+            // Add sound effects (optional - using Web Audio API)
+            function playSound(frequency, duration) {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            }
+
+            // Add sound to button clicks
+            buttons.forEach(button => {
+                button.addEventListener('click', () => playSound(800, 0.1));
+            });
+
+            document.querySelector('input[value="="]').addEventListener('click', () => playSound(1000, 0.2));
+        }
+
+        // Add hover effect to style button even before styling
+        document.getElementById('style-btn').addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+        });
+
+        document.getElementById('style-btn').addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    </script>
+</body>
+</html>
